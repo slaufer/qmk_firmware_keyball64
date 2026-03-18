@@ -28,23 +28,19 @@ The primary half's OLED SHALL display the current active layer number, the state
 - **THEN** the NUM indicator on the primary OLED is rendered with inverted colors
 
 ### Requirement: Secondary half renders WPM and modifier info
-The secondary half's OLED SHALL display the current words-per-minute (WPM) value, a row showing currently held non-modifier keys (up to 5), and the state of the four modifier keys (GUI, Ctrl, Alt, Shift) for its physical side. Active modifier indicators SHALL be rendered with full-row inversion. The display SHALL use portrait-mode orientation (`OLED_ROTATION_270`).
+The secondary half's OLED SHALL render a base display bitmap every frame, with modifier indicator glyphs (Shift, Control, Super, Alt) composited at their designated bounding boxes for the physical side of that half. No WPM value or held-key characters are displayed. The display SHALL use portrait-mode orientation (`OLED_ROTATION_270`).
 
-#### Scenario: WPM displayed on secondary
+#### Scenario: Slave OLED renders base image
 - **WHEN** the secondary OLED renders
-- **THEN** it shows the current WPM value
+- **THEN** the full 32×128 slave base bitmap is drawn as the background layer
 
-#### Scenario: Held keys displayed on secondary
-- **WHEN** one or more non-modifier keys are held
-- **THEN** the secondary OLED shows up to 5 characters representing the held keys
-
-#### Scenario: Secondary active modifiers shown with full-row inversion
+#### Scenario: Secondary active modifiers shown as glyphs
 - **WHEN** a modifier key on the secondary half's physical side is held
-- **THEN** the corresponding modifier indicator occupies a full row with inverted colors
+- **THEN** the corresponding 16×16 modifier glyph is composited at its bounding box
 
-#### Scenario: Secondary inactive modifiers are hidden
+#### Scenario: Secondary inactive modifiers are blank
 - **WHEN** a modifier key on the secondary half's physical side is not held
-- **THEN** the corresponding row is blank
+- **THEN** the corresponding bounding box region is left to the base image
 
 ### Requirement: OLED is enabled for via and default keymaps
 Both the `via` and `default` keymaps SHALL build with `OLED_ENABLE = yes` in their `rules.mk`.

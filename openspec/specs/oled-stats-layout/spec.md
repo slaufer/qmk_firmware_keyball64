@@ -47,41 +47,6 @@ The master half's OLED SHALL render a 16-row portrait-mode layout (5 chars wide)
 - **WHEN** a one-shot modifier is active
 - **THEN** the corresponding indicator row shows with full-row inversion
 
-### Requirement: Slave half renders portrait-mode WPM and modifier layout
-The slave half's OLED SHALL render a 16-row portrait-mode layout (5 chars wide). From top to bottom: " WPM" label (row 0), right-justified WPM value (row 1), one blank row, held-keys row (row 3, up to 5 chars), eight blank rows, then one row each for SHIFT, CTRL, SUPER, and ALT modifier indicators (rows 12–15). Each indicator row SHALL display a 5-char padded label with full-row inversion when active, and SHALL be blank when inactive.
-
-#### Scenario: WPM label and value shown on slave
-- **WHEN** the slave OLED renders
-- **THEN** row 0 shows " WPM" (1 leading space) and row 1 shows the current WPM value right-justified in 5 chars
-
-#### Scenario: Held-keys row shown on slave
-- **WHEN** the slave OLED renders and at least one non-modifier key is held
-- **THEN** row 3 displays up to 5 characters representing the currently held keys
-
-#### Scenario: Held-keys row blank at idle
-- **WHEN** no non-modifier keys are held
-- **THEN** row 3 is blank
-
-#### Scenario: SHIFT modifier active on slave
-- **WHEN** Shift is held on the slave's physical side
-- **THEN** row 12 displays "SHIFT" padded to 5 chars with full-row inversion
-
-#### Scenario: CTRL modifier active on slave
-- **WHEN** Ctrl is held on the slave's physical side
-- **THEN** row 13 displays "CTRL " (1 trailing space) padded to 5 chars with full-row inversion
-
-#### Scenario: SUPER modifier active on slave
-- **WHEN** GUI/Super is held on the slave's physical side
-- **THEN** row 14 displays "SUPER" padded to 5 chars with full-row inversion
-
-#### Scenario: ALT modifier active on slave
-- **WHEN** Alt is held on the slave's physical side
-- **THEN** row 15 displays " ALT " (1 leading space, 1 trailing space) padded to 5 chars with full-row inversion
-
-#### Scenario: Inactive modifier rows are blank on slave
-- **WHEN** a modifier is not held
-- **THEN** the corresponding row is blank
-
 ### Requirement: Portrait-mode orientation on both halves
 Both OLEDs SHALL be initialized with `OLED_ROTATION_270` so that the text layout matches the 90° CCW physical mounting orientation of the panels.
 
