@@ -4,6 +4,8 @@ This is a fork of [QMK Firmware](https://github.com/qmk/qmk_firmware) with suppo
 
 The Keyball64 driver and keymaps are located under `keyboards/holykeebs/keyball64/`.
 
+![Keyball64 OLED display](keyboards/keyball64/display_photo.jpg)
+
 ---
 
 # Quantum Mechanical Keyboard Firmware
