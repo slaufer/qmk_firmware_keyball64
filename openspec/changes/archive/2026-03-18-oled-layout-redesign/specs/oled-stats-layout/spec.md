@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Master half renders portrait-mode stats layout
 The master half's OLED SHALL render a 16-row portrait-mode layout (5 chars wide). From top to bottom: "LAYER" label (row 0), right-justified layer number (row 1), one blank row, "CAPSK" indicator (row 3), "NUMLK" indicator (row 4), seven blank rows, then one row each for SHIFT, CTRL, SUPER, and ALT modifier indicators (rows 12–15). Each indicator row SHALL display a 5-char padded label with full-row inversion when active, and SHALL be blank (empty row) when inactive.
