@@ -18,6 +18,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include QMK_KEYBOARD_H
 
+#ifdef OLED_ENABLE
+void oledkit_render_info_user(void) {
+    // Line 1: active layer
+    oled_write_P(PSTR("Layer: "), false);
+    oled_write(get_u8_str(get_highest_layer(layer_state), ' '), false);
+    oled_advance_page(true);
+
+    // Line 2: active modifiers
+    uint8_t mods = get_mods() | get_oneshot_mods();
+    oled_write_P(mods & MOD_MASK_SHIFT ? PSTR("SFT ") : PSTR("    "), false);
+    oled_write_P(mods & MOD_MASK_CTRL  ? PSTR("CTL ") : PSTR("    "), false);
+    oled_write_P(mods & MOD_MASK_ALT   ? PSTR("ALT ") : PSTR("    "), false);
+    oled_write_P(mods & MOD_MASK_GUI   ? PSTR("GUI")  : PSTR("   "),  false);
+    oled_advance_page(true);
+}
+#endif
+
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     // Layer 0: Base QWERTY
