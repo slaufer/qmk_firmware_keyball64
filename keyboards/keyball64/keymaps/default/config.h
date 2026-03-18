@@ -1,7 +1,5 @@
 #pragma once
 
-#define DYNAMIC_KEYMAP_LAYER_COUNT 4
-
 #define SPLIT_LAYER_STATE_ENABLE
 #define SPLIT_MODS_ENABLE
 #define SPLIT_WPM_ENABLE

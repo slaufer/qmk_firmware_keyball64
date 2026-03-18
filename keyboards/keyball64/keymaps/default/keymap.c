@@ -18,6 +18,81 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include QMK_KEYBOARD_H
 
+#ifdef OLED_ENABLE
+
+oled_rotation_t oled_init_user(oled_rotation_t rotation) {
+    return OLED_ROTATION_270;
+}
+
+static void render_mods(bool left_side) {
+    uint8_t mods = get_mods() | get_oneshot_mods();
+    bool win, ctl, alt, sft;
+    if (left_side) {
+        win = mods & MOD_BIT(KC_LGUI);
+        ctl = mods & MOD_BIT(KC_LCTL);
+        alt = mods & MOD_BIT(KC_LALT);
+        sft = mods & MOD_BIT(KC_LSFT);
+    } else {
+        win = mods & MOD_BIT(KC_RGUI);
+        ctl = mods & MOD_BIT(KC_RCTL);
+        alt = mods & MOD_BIT(KC_RALT);
+        sft = mods & MOD_BIT(KC_RSFT);
+    }
+    oled_write_P(win ? PSTR("WIN") : PSTR("   "), win);
+    oled_write_P(ctl ? PSTR("CTRL") : PSTR("    "), ctl);
+    oled_advance_page(true);
+    oled_write_P(alt ? PSTR("ALT") : PSTR("   "), alt);
+    oled_write_P(sft ? PSTR("SHFT") : PSTR("    "), sft);
+    oled_advance_page(true);
+}
+
+void oledkit_render_info_user(void) {
+    // Layer
+    oled_write_P(PSTR("LAYER"), false);
+    oled_advance_page(true);
+    oled_write(get_u8_str(get_highest_layer(layer_state), ' '), false);
+    oled_advance_page(true);
+
+    // Lock indicators
+    led_t leds = host_keyboard_led_state();
+    oled_write_P(leds.caps_lock ? PSTR("CAPS") : PSTR("    "), leds.caps_lock);
+    oled_write_P(leds.num_lock  ? PSTR("NUM")  : PSTR("   "),  leds.num_lock);
+    oled_advance_page(true);
+
+    // Padding
+    oled_advance_page(true);
+    oled_advance_page(true);
+    oled_advance_page(true);
+
+    // Modifiers for this half (no blank row between locks and mods)
+    render_mods(is_keyboard_left());
+}
+
+bool oled_task_user(void) {
+    if (is_keyboard_master()) {
+        oledkit_render_info_user();
+    } else {
+        // WPM
+        oled_write_P(PSTR("WPM:"), false);
+        oled_advance_page(true);
+        oled_write(get_u8_str(get_current_wpm(), ' '), false);
+        oled_advance_page(true);
+
+        // Padding
+        oled_advance_page(true);
+        oled_advance_page(true);
+        oled_advance_page(true);
+        oled_advance_page(true);
+        oled_advance_page(true);
+
+        // Modifiers for this half
+        render_mods(is_keyboard_left());
+    }
+    return false;
+}
+
+#endif // OLED_ENABLE
+
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     // Layer 0: Base QWERTY
