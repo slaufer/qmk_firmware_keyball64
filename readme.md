@@ -1,3 +1,11 @@
+# QMK Firmware — Keyball64 Fork
+
+This is a fork of [QMK Firmware](https://github.com/qmk/qmk_firmware) with support for the **Keyball64**, a variant of the Keyball61 that omits the trackball.
+
+The Keyball64 driver and keymaps are located under `keyboards/holykeebs/keyball64/`.
+
+---
+
 # Quantum Mechanical Keyboard Firmware
 
 [![Current Version](https://img.shields.io/github/tag/qmk/qmk_firmware.svg)](https://github.com/qmk/qmk_firmware/tags)
