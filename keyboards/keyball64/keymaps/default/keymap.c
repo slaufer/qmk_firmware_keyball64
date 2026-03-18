@@ -24,8 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Held-key tracking
 // ---------------------------------------------------------------------------
 
-static uint16_t held_keycodes[5]  = {0};
-static char     held_display[6]   = {' ', ' ', ' ', ' ', ' ', '\0'};
+static uint16_t held_keycodes[5] = {0};
+char            held_display[6]  = {' ', ' ', ' ', ' ', ' ', '\0'};
 
 static char keycode_to_char(uint16_t kc) {
     if (kc >= KC_A  && kc <= KC_Z)  return 'A' + (kc - KC_A);
@@ -87,77 +87,6 @@ void housekeeping_task_user(void) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// OLED
-// ---------------------------------------------------------------------------
-
-#ifdef OLED_ENABLE
-
-oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-    return OLED_ROTATION_270;
-}
-
-void oledkit_render_info_user(void) {
-    uint8_t mods = get_mods() | get_oneshot_mods();
-    bool    left = is_keyboard_left();
-    bool    sft  = mods & (left ? MOD_BIT(KC_LSFT) : MOD_BIT(KC_RSFT));
-    bool    ctl  = mods & (left ? MOD_BIT(KC_LCTL) : MOD_BIT(KC_RCTL));
-    bool    gui  = mods & (left ? MOD_BIT(KC_LGUI) : MOD_BIT(KC_RGUI));
-    bool    alt  = mods & (left ? MOD_BIT(KC_LALT) : MOD_BIT(KC_RALT));
-    led_t   leds = host_keyboard_led_state();
-
-    oled_write_P(PSTR("LAYER"), false);                                             // row  0
-    oled_write_P(PSTR("  "), false);                                                // row  1
-    oled_write(get_u8_str(get_highest_layer(layer_state), ' '), false);
-    oled_write_P(PSTR("     "), false);                                             // row  2
-    oled_write_P(leds.caps_lock ? PSTR("CAPSK") : PSTR("     "), leds.caps_lock);  // row  3
-    oled_write_P(leds.num_lock  ? PSTR("NUMLK") : PSTR("     "), leds.num_lock);   // row  4
-    oled_write_P(PSTR("     "), false);                                             // row  5
-    oled_write_P(PSTR("     "), false);                                             // row  6
-    oled_write_P(PSTR("     "), false);                                             // row  7
-    oled_write_P(PSTR("     "), false);                                             // row  8
-    oled_write_P(PSTR("     "), false);                                             // row  9
-    oled_write_P(PSTR("     "), false);                                             // row 10
-    oled_write_P(PSTR("     "), false);                                             // row 11
-    oled_write_P(sft ? PSTR("SHIFT") : PSTR("     "), sft);                        // row 12
-    oled_write_P(ctl ? PSTR(" CTRL") : PSTR("     "), ctl);                        // row 13
-    oled_write_P(gui ? PSTR("SUPER") : PSTR("     "), gui);                        // row 14
-    oled_write_P(alt ? PSTR(" ALT ") : PSTR("     "), alt);                        // row 15
-}
-
-bool oled_task_user(void) {
-    if (is_keyboard_master()) {
-        oledkit_render_info_user();
-    } else {
-        uint8_t mods = get_mods() | get_oneshot_mods();
-        bool    left = is_keyboard_left();
-        bool    sft  = mods & (left ? MOD_BIT(KC_LSFT) : MOD_BIT(KC_RSFT));
-        bool    ctl  = mods & (left ? MOD_BIT(KC_LCTL) : MOD_BIT(KC_RCTL));
-        bool    gui  = mods & (left ? MOD_BIT(KC_LGUI) : MOD_BIT(KC_RGUI));
-        bool    alt  = mods & (left ? MOD_BIT(KC_LALT) : MOD_BIT(KC_RALT));
-
-        oled_write_P(PSTR(" WPM "), false);                                         // row  0
-        oled_write_P(PSTR("  "), false);                                            // row  1
-        oled_write(get_u8_str(get_current_wpm(), ' '), false);
-        oled_write_P(PSTR("     "), false);                                         // row  2
-        oled_write(held_display, false);                                            // row  3
-        oled_write_P(PSTR("     "), false);                                         // row  4
-        oled_write_P(PSTR("     "), false);                                         // row  5
-        oled_write_P(PSTR("     "), false);                                         // row  6
-        oled_write_P(PSTR("     "), false);                                         // row  7
-        oled_write_P(PSTR("     "), false);                                         // row  8
-        oled_write_P(PSTR("     "), false);                                         // row  9
-        oled_write_P(PSTR("     "), false);                                         // row 10
-        oled_write_P(PSTR("     "), false);                                         // row 11
-        oled_write_P(sft ? PSTR("SHIFT") : PSTR("     "), sft);                    // row 12
-        oled_write_P(ctl ? PSTR("CTRL ") : PSTR("     "), ctl);                    // row 13
-        oled_write_P(gui ? PSTR("SUPER") : PSTR("     "), gui);                    // row 14
-        oled_write_P(alt ? PSTR(" ALT ") : PSTR("     "), alt);                    // row 15
-    }
-    return false;
-}
-
-#endif // OLED_ENABLE
 
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
