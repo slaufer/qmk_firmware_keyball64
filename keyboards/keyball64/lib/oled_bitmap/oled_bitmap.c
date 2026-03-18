@@ -301,17 +301,20 @@ void oledkit_render_info_user(void) {
     // Num Lock — x 16–31, y 78–93
     if (leds.num_lock) draw_bitmap(16, 78, bmp_numlock, 16, 16);
 
+    // Show modifiers for whichever physical half this OLED is on
+    bool left = is_keyboard_left();
+
     // Shift — x 0–15, y 96–111
-    if (mods & MOD_MASK_SHIFT) draw_bitmap(0, 96, bmp_shift, 16, 16);
+    if (mods & (left ? MOD_BIT(KC_LSFT) : MOD_BIT(KC_RSFT))) draw_bitmap(0, 96, bmp_shift, 16, 16);
 
     // Control — x 16–31, y 96–111
-    if (mods & MOD_MASK_CTRL) draw_bitmap(16, 96, bmp_control, 16, 16);
+    if (mods & (left ? MOD_BIT(KC_LCTL) : MOD_BIT(KC_RCTL))) draw_bitmap(16, 96, bmp_control, 16, 16);
 
     // Super — x 0–15, y 112–127
-    if (mods & MOD_MASK_GUI) draw_bitmap(0, 112, bmp_super, 16, 16);
+    if (mods & (left ? MOD_BIT(KC_LGUI) : MOD_BIT(KC_RGUI))) draw_bitmap(0, 112, bmp_super, 16, 16);
 
     // Alt — x 16–31, y 112–127
-    if (mods & MOD_MASK_ALT) draw_bitmap(16, 112, bmp_alt, 16, 16);
+    if (mods & (left ? MOD_BIT(KC_LALT) : MOD_BIT(KC_RALT))) draw_bitmap(16, 112, bmp_alt, 16, 16);
 }
 
 bool oled_task_user(void) {
