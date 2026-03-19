@@ -13,17 +13,6 @@ The slave OLED display SHALL render an 8×8 pixel ball glyph within the bounding
 - **WHEN** the ball is at any valid position
 - **THEN** the ball top-left y coordinate SHALL never exceed 87 (ensuring the ball stays within y 0–95)
 
-### Requirement: Ball advances on key press
-On each physical key press event (any key, any half), the ball position SHALL advance diagonally by 2 pixels in both the current horizontal and vertical direction.
-
-#### Scenario: Ball moves on press
-- **WHEN** a key press event fires (`record->event.pressed == true`)
-- **THEN** ball x SHALL change by dx and ball y SHALL change by dy
-
-#### Scenario: Ball does not move on key release
-- **WHEN** a key release event fires (`record->event.pressed == false`)
-- **THEN** ball position SHALL remain unchanged
-
 ### Requirement: Ball initial direction
 The ball SHALL start at position (0, 0) and travel toward the bottom-right corner (dx = +2, dy = +2).
 
@@ -60,9 +49,13 @@ When the ball collides with both a horizontal and a vertical boundary simultaneo
 - **WHEN** applying the current delta would violate both the x and y bounds simultaneously
 - **THEN** both dx and dy SHALL be negated and both coordinates SHALL be clamped
 
-### Requirement: Public key-press notification API
-A function `oled_ball_on_key_press()` SHALL be declared in `oled_bitmap.h` and defined in `oled_bitmap.c`, callable from `process_record_user()` in keymap files.
+### Requirement: Public tick API
+A function `oled_ball_tick()` SHALL be declared in `oled_bitmap.h` and defined in `oled_bitmap.c`. It SHALL perform the same position-advance logic as the former `oled_ball_on_key_press()`: shift the history buffer, compute the new position with bounce, and update `ball_x`/`ball_y`.
 
-#### Scenario: Keymaps call the function
-- **WHEN** `process_record_user()` receives a press event
-- **THEN** it SHALL call `oled_ball_on_key_press()`
+#### Scenario: Tick advances ball position
+- **WHEN** `oled_ball_tick()` is called
+- **THEN** ball_x SHALL change by ball_dx and ball_y SHALL change by ball_dy (with clamping and direction reversal at bounds)
+
+#### Scenario: Tick shifts history
+- **WHEN** `oled_ball_tick()` is called
+- **THEN** the history entries SHALL be shifted: index 2 ← index 1 ← index 0 ← current position before the move

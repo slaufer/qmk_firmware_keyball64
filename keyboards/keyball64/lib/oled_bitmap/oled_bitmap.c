@@ -29,27 +29,8 @@ static uint8_t ball_rand8(void) {
     return ball_prng_state;
 }
 
-void oled_ball_get_pos(uint8_t *x, uint8_t *y) {
-    *x = ball_x;
-    *y = ball_y;
-}
 
-void oled_ball_set_pos(uint8_t x, uint8_t y) {
-    ball_x = x;
-    ball_y = y;
-}
-
-void oled_ball_get_history(uint8_t *hx, uint8_t *hy) {
-    hx[0] = ball_hist_x[0]; hx[1] = ball_hist_x[1]; hx[2] = ball_hist_x[2];
-    hy[0] = ball_hist_y[0]; hy[1] = ball_hist_y[1]; hy[2] = ball_hist_y[2];
-}
-
-void oled_ball_set_history(const uint8_t *hx, const uint8_t *hy) {
-    ball_hist_x[0] = hx[0]; ball_hist_x[1] = hx[1]; ball_hist_x[2] = hx[2];
-    ball_hist_y[0] = hy[0]; ball_hist_y[1] = hy[1]; ball_hist_y[2] = hy[2];
-}
-
-void oled_ball_on_key_press(void) {
+void oled_ball_tick(void) {
     // Shift history before updating position
     ball_hist_x[2] = ball_hist_x[1]; ball_hist_y[2] = ball_hist_y[1];
     ball_hist_x[1] = ball_hist_x[0]; ball_hist_y[1] = ball_hist_y[0];
