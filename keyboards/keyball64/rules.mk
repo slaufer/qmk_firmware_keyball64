@@ -18,5 +18,4 @@ SERIAL_DRIVER = vendor
 
 # OLED (disabled by default; enable per keymap)
 OLED_ENABLE = no
-SRC += lib/oledkit/oledkit.c
 SRC += lib/oled_bitmap/oled_bitmap.c
