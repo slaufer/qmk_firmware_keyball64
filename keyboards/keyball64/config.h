@@ -35,13 +35,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define SPLIT_WATCHDOG_ENABLE
 #define SPLIT_WATCHDOG_TIMEOUT 3000
 
-// OLED font
-#ifndef OLED_FONT_H
-#    define OLED_FONT_H "keyboards/keyball64/lib/logofont/logofont.c"
-#    define OLED_FONT_START 32
-#    define OLED_FONT_END 195
-#endif
-
 // RP2040 bootloader
 #define RP2040_BOOTLOADER_DOUBLE_TAP_RESET
 #define RP2040_BOOTLOADER_DOUBLE_TAP_RESET_TIMEOUT 1000U
