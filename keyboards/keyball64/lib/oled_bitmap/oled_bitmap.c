@@ -380,6 +380,53 @@ static const uint8_t PROGMEM bmp_ball[8] = {
     0x3C,
 };
 
+// Ball mask: 8×8 px — defines the circular region of the ball glyph
+static const uint8_t PROGMEM bmp_ball_mask[8] = {
+    0x3C,
+    0x7E,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0x7E,
+    0x3C,
+};
+
+// Trail glyph: 8×8 px — base image used for all trail segments
+static const uint8_t PROGMEM bmp_ball_trail[8] = {
+    0x3C,
+    0x7E,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0x7E,
+    0x3C,
+};
+
+// Trail masks: 3 sets (closest→most distant) × 4 random variants each
+static const uint8_t PROGMEM bmp_ball_trail1_mask1[8] = { 0x14, 0x7E, 0x55, 0xFF, 0x55, 0xFF, 0x54, 0x3C };
+static const uint8_t PROGMEM bmp_ball_trail1_mask2[8] = { 0x3C, 0x2A, 0xFF, 0xAA, 0xFF, 0xAA, 0x7E, 0x28 };
+static const uint8_t PROGMEM bmp_ball_trail1_mask3[8] = { 0x28, 0x7E, 0xAA, 0xFF, 0xAA, 0xFF, 0x2A, 0x3C };
+static const uint8_t PROGMEM bmp_ball_trail1_mask4[8] = { 0x3C, 0x54, 0xFF, 0x55, 0xFF, 0x55, 0x7E, 0x14 };
+
+static const uint8_t PROGMEM bmp_ball_trail2_mask1[8] = { 0x14, 0x2A, 0x55, 0xAA, 0x55, 0xAA, 0x54, 0x28 };
+static const uint8_t PROGMEM bmp_ball_trail2_mask2[8] = { 0x28, 0x54, 0xAA, 0x55, 0xAA, 0x55, 0x2A, 0x14 };
+static const uint8_t PROGMEM bmp_ball_trail2_mask3[8] = { 0x28, 0x54, 0xAA, 0x55, 0xAA, 0x55, 0x2A, 0x14 };
+static const uint8_t PROGMEM bmp_ball_trail2_mask4[8] = { 0x14, 0x2A, 0x55, 0xAA, 0x55, 0xAA, 0x54, 0x28 };
+
+static const uint8_t PROGMEM bmp_ball_trail3_mask1[8] = { 0x14, 0x00, 0x55, 0x00, 0x55, 0x00, 0x54, 0x00 };
+static const uint8_t PROGMEM bmp_ball_trail3_mask2[8] = { 0x00, 0x54, 0x00, 0x55, 0x00, 0x55, 0x00, 0x14 };
+static const uint8_t PROGMEM bmp_ball_trail3_mask3[8] = { 0x00, 0x2A, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0x28 };
+static const uint8_t PROGMEM bmp_ball_trail3_mask4[8] = { 0x28, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0x2A, 0x00 };
+
+// Lookup table: trail_masks[set][variant], set 0=closest(trail1), set 2=farthest(trail3)
+static const uint8_t * const bmp_ball_trail_masks[3][4] = {
+    { bmp_ball_trail1_mask1, bmp_ball_trail1_mask2, bmp_ball_trail1_mask3, bmp_ball_trail1_mask4 },
+    { bmp_ball_trail2_mask1, bmp_ball_trail2_mask2, bmp_ball_trail2_mask3, bmp_ball_trail2_mask4 },
+    { bmp_ball_trail3_mask1, bmp_ball_trail3_mask2, bmp_ball_trail3_mask3, bmp_ball_trail3_mask4 },
+};
+
 // ---------------------------------------------------------------------------
 // Bouncing ball state
 // ---------------------------------------------------------------------------
@@ -389,6 +436,17 @@ static uint8_t ball_x  = 0;
 static uint8_t ball_y  = 0;
 static int8_t  ball_dx = 4;
 static int8_t  ball_dy = 4;
+
+// Trail history: index 0 = most recent previous position, index 2 = oldest.
+static uint8_t ball_hist_x[3] = {0, 0, 0};
+static uint8_t ball_hist_y[3] = {0, 0, 0};
+
+// Simple LCG PRNG — avoids lib8tion dependency.
+static uint8_t ball_prng_state = 42;
+static uint8_t ball_rand8(void) {
+    ball_prng_state = ball_prng_state * 109 + 89;
+    return ball_prng_state;
+}
 
 void oled_ball_get_pos(uint8_t *x, uint8_t *y) {
     *x = ball_x;
@@ -400,7 +458,22 @@ void oled_ball_set_pos(uint8_t x, uint8_t y) {
     ball_y = y;
 }
 
+void oled_ball_get_history(uint8_t *hx, uint8_t *hy) {
+    hx[0] = ball_hist_x[0]; hx[1] = ball_hist_x[1]; hx[2] = ball_hist_x[2];
+    hy[0] = ball_hist_y[0]; hy[1] = ball_hist_y[1]; hy[2] = ball_hist_y[2];
+}
+
+void oled_ball_set_history(const uint8_t *hx, const uint8_t *hy) {
+    ball_hist_x[0] = hx[0]; ball_hist_x[1] = hx[1]; ball_hist_x[2] = hx[2];
+    ball_hist_y[0] = hy[0]; ball_hist_y[1] = hy[1]; ball_hist_y[2] = hy[2];
+}
+
 void oled_ball_on_key_press(void) {
+    // Shift history before updating position
+    ball_hist_x[2] = ball_hist_x[1]; ball_hist_y[2] = ball_hist_y[1];
+    ball_hist_x[1] = ball_hist_x[0]; ball_hist_y[1] = ball_hist_y[0];
+    ball_hist_x[0] = ball_x;         ball_hist_y[0] = ball_y;
+
     int16_t nx = (int16_t)ball_x + ball_dx;
     int16_t ny = (int16_t)ball_y + ball_dy;
 
@@ -426,6 +499,21 @@ void draw_bitmap(uint8_t x0, uint8_t y0,
     uint8_t bpr = (w + 7) / 8;
     for (uint8_t row = 0; row < h; row++) {
         for (uint8_t col = 0; col < w; col++) {
+            uint8_t b  = pgm_read_byte(data + row * bpr + col / 8);
+            bool    on = (b >> (7 - col % 8)) & 1;
+            oled_write_pixel(x0 + col, y0 + row, on);
+        }
+    }
+}
+
+void draw_bitmap_masked(uint8_t x0, uint8_t y0,
+                        const uint8_t *data, const uint8_t *mask,
+                        uint8_t w, uint8_t h) {
+    uint8_t bpr = (w + 7) / 8;
+    for (uint8_t row = 0; row < h; row++) {
+        for (uint8_t col = 0; col < w; col++) {
+            uint8_t m = pgm_read_byte(mask + row * bpr + col / 8);
+            if (!((m >> (7 - col % 8)) & 1)) continue;
             uint8_t b  = pgm_read_byte(data + row * bpr + col / 8);
             bool    on = (b >> (7 - col % 8)) & 1;
             oled_write_pixel(x0 + col, y0 + row, on);
@@ -505,8 +593,16 @@ bool oled_task_user(void) {
         // Base image (always present)
         draw_bitmap(0, 0, bmp_base_slave, 32, 128);
 
+        // Bouncing ball trail — draw oldest segment first so closer ones paint on top
+        uint16_t wpm = get_current_wpm();
+        uint8_t trailcount = (wpm > 90) ? 3 : (wpm > 60) ? 2 : (wpm > 30) ? 1 : 0;
+        for (int8_t i = (int8_t)trailcount - 1; i >= 0; i--) {
+            const uint8_t *tmask = bmp_ball_trail_masks[i + (3 - trailcount)][ball_rand8() % 4];
+            draw_bitmap_masked(ball_hist_x[i], ball_hist_y[i], bmp_ball_trail, tmask, 8, 8);
+        }
+
         // Bouncing ball — x 0–31, y 0–95
-        draw_bitmap(ball_x, ball_y, bmp_ball, 8, 8);
+        draw_bitmap_masked(ball_x, ball_y, bmp_ball, bmp_ball_mask, 8, 8);
 
         // Shift — x 0–15, y 96–111
         if (mods & (left ? MOD_BIT(KC_LSFT) : MOD_BIT(KC_RSFT))) draw_bitmap(0, 96, bmp_shift, 16, 16);

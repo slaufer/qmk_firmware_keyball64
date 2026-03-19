@@ -81,9 +81,12 @@ static void held_keys_slave_handler(uint8_t in_buflen, const void *in_data,
 
 static void ball_pos_slave_handler(uint8_t in_buflen, const void *in_data,
                                    uint8_t out_buflen, void *out_data) {
-    if (in_buflen == 2) {
-        const uint8_t *pos = (const uint8_t *)in_data;
-        oled_ball_set_pos(pos[0], pos[1]);
+    if (in_buflen == 8) {
+        const uint8_t *d = (const uint8_t *)in_data;
+        oled_ball_set_pos(d[0], d[1]);
+        uint8_t hx[3] = {d[2], d[4], d[6]};
+        uint8_t hy[3] = {d[3], d[5], d[7]};
+        oled_ball_set_history(hx, hy);
     }
 }
 
@@ -95,9 +98,14 @@ void keyboard_post_init_user(void) {
 void housekeeping_task_user(void) {
     if (is_keyboard_master()) {
         transaction_rpc_exec(HELD_KEYS_SYNC, 5, held_display, 0, NULL);
-        uint8_t ball_pos[2];
-        oled_ball_get_pos(&ball_pos[0], &ball_pos[1]);
-        transaction_rpc_exec(BALL_POS_SYNC, 2, ball_pos, 0, NULL);
+        uint8_t hx[3], hy[3];
+        oled_ball_get_history(hx, hy);
+        uint8_t ball_buf[8];
+        oled_ball_get_pos(&ball_buf[0], &ball_buf[1]);
+        ball_buf[2] = hx[0]; ball_buf[3] = hy[0];
+        ball_buf[4] = hx[1]; ball_buf[5] = hy[1];
+        ball_buf[6] = hx[2]; ball_buf[7] = hy[2];
+        transaction_rpc_exec(BALL_POS_SYNC, 8, ball_buf, 0, NULL);
     }
 }
 
