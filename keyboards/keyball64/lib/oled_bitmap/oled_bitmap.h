@@ -13,4 +13,14 @@ void draw_bitmap(uint8_t x0, uint8_t y0, const uint8_t *data, uint8_t w, uint8_t
 // centered horizontally in the 32px-wide region starting at (box_x, box_y).
 void draw_number(uint16_t value, uint8_t box_x, uint8_t box_y);
 
+// Advance the bouncing ball by one step. Call from process_record_user()
+// on key press events to animate the ball on the slave OLED.
+void oled_ball_on_key_press(void);
+
+// Read the current ball position (used on the master to send synced state).
+void oled_ball_get_pos(uint8_t *x, uint8_t *y);
+
+// Overwrite the ball position (used on the slave to apply synced state).
+void oled_ball_set_pos(uint8_t x, uint8_t y);
+
 #endif // OLED_ENABLE

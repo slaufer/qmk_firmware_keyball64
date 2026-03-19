@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include QMK_KEYBOARD_H
 #include "transactions.h"
 #include <string.h>
+#include "lib/oled_bitmap/oled_bitmap.h"
 
 // ---------------------------------------------------------------------------
 // Held-key tracking
@@ -45,6 +46,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (keycode >= KC_LCTL && keycode <= KC_RGUI) return true;
 
     if (record->event.pressed) {
+        oled_ball_on_key_press();
         // Avoid duplicates
         for (int i = 0; i < 5; i++) {
             if (held_keycodes[i] == keycode) return true;
@@ -77,13 +79,25 @@ static void held_keys_slave_handler(uint8_t in_buflen, const void *in_data,
     if (in_buflen == 5) memcpy(held_display, in_data, 5);
 }
 
+static void ball_pos_slave_handler(uint8_t in_buflen, const void *in_data,
+                                   uint8_t out_buflen, void *out_data) {
+    if (in_buflen == 2) {
+        const uint8_t *pos = (const uint8_t *)in_data;
+        oled_ball_set_pos(pos[0], pos[1]);
+    }
+}
+
 void keyboard_post_init_user(void) {
     transaction_register_rpc(HELD_KEYS_SYNC, held_keys_slave_handler);
+    transaction_register_rpc(BALL_POS_SYNC,  ball_pos_slave_handler);
 }
 
 void housekeeping_task_user(void) {
     if (is_keyboard_master()) {
         transaction_rpc_exec(HELD_KEYS_SYNC, 5, held_display, 0, NULL);
+        uint8_t ball_pos[2];
+        oled_ball_get_pos(&ball_pos[0], &ball_pos[1]);
+        transaction_rpc_exec(BALL_POS_SYNC, 2, ball_pos, 0, NULL);
     }
 }
 

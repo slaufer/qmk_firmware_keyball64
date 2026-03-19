@@ -368,6 +368,55 @@ static const uint8_t PROGMEM bmp_alt[32] = {
     0xC1, 0x83, 0xC3, 0x83, 0x7F, 0xFE, 0x3F, 0xFC,
 };
 
+// Ball glyph: 8×8 px, 1 byte/row, MSB = leftmost pixel
+static const uint8_t PROGMEM bmp_ball[8] = {
+    0x3C,
+    0x4E,
+    0x9F,
+    0xBF,
+    0xFF,
+    0xFF,
+    0x7E,
+    0x3C,
+};
+
+// ---------------------------------------------------------------------------
+// Bouncing ball state
+// ---------------------------------------------------------------------------
+
+// Ball position (top-left corner). Valid range: x ∈ [0,23], y ∈ [0,87].
+static uint8_t ball_x  = 0;
+static uint8_t ball_y  = 0;
+static int8_t  ball_dx = 4;
+static int8_t  ball_dy = 4;
+
+void oled_ball_get_pos(uint8_t *x, uint8_t *y) {
+    *x = ball_x;
+    *y = ball_y;
+}
+
+void oled_ball_set_pos(uint8_t x, uint8_t y) {
+    ball_x = x;
+    ball_y = y;
+}
+
+void oled_ball_on_key_press(void) {
+    int16_t nx = (int16_t)ball_x + ball_dx;
+    int16_t ny = (int16_t)ball_y + ball_dy;
+
+    if (nx < 0 || nx > 23) {
+        ball_dx = -ball_dx;
+        nx = nx < 0 ? 0 : 23;
+    }
+    if (ny < 0 || ny > 87) {
+        ball_dy = -ball_dy;
+        ny = ny < 0 ? 0 : 87;
+    }
+
+    ball_x = (uint8_t)nx;
+    ball_y = (uint8_t)ny;
+}
+
 // ---------------------------------------------------------------------------
 // Rendering helpers
 // ---------------------------------------------------------------------------
@@ -455,6 +504,9 @@ bool oled_task_user(void) {
 
         // Base image (always present)
         draw_bitmap(0, 0, bmp_base_slave, 32, 128);
+
+        // Bouncing ball — x 0–31, y 0–95
+        draw_bitmap(ball_x, ball_y, bmp_ball, 8, 8);
 
         // Shift — x 0–15, y 96–111
         if (mods & (left ? MOD_BIT(KC_LSFT) : MOD_BIT(KC_RSFT))) draw_bitmap(0, 96, bmp_shift, 16, 16);
