@@ -6,6 +6,8 @@ The Keyball64 driver and keymaps are located under `keyboards/holykeebs/keyball6
 
 ![Keyball64 OLED display](keyboards/keyball64/display_photo.jpg)
 
+<video aria-label="keyball64 demo video" src="https://github.com/user-attachments/assets/594368fd-2d0c-4358-ae05-c8e9787e481e"></video>
+
 ---
 
 # Quantum Mechanical Keyboard Firmware
