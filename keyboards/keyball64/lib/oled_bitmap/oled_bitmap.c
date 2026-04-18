@@ -146,6 +146,11 @@ static void oledkit_render_info_user(void) {
 }
 
 bool oled_task_user(void) {
+    if (last_input_activity_elapsed() >= 300000UL) {
+        oled_off();
+        return false;
+    }
+    oled_on();
     if (is_keyboard_master()) {
         oledkit_render_info_user();
     } else {
