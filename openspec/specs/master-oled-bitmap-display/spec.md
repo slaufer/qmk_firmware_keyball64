@@ -73,6 +73,32 @@ The master OLED SHALL render the `glyph_numlock_16x16.png` bitmap at bounding bo
 
 ---
 
+### Requirement: Swap-hands indicator glyph
+The master OLED SHALL render the `glyph_swaphands_16x16.png` bitmap at bounding box (x: 0–15, y: 60–75) when swap-hands is active, and render nothing in that area when inactive.
+
+#### Scenario: Swap-hands active
+- **WHEN** `is_swap_hands_on()` is true
+- **THEN** the 16×16 swap-hands glyph is rendered at x=0, y=60
+
+#### Scenario: Swap-hands inactive
+- **WHEN** `is_swap_hands_on()` is false
+- **THEN** the region x 0–15, y 60–75 is left to the base image
+
+---
+
+### Requirement: Dynamic macro recording indicator glyph
+The master OLED SHALL render the `glyph_record_16x16.png` bitmap at bounding box (x: 16–31, y: 60–75) when any dynamic macro slot is being recorded, and render nothing in that area otherwise. Recording state SHALL be tracked via `dynamic_macro_record_start_user` and `dynamic_macro_record_end_user` callbacks.
+
+#### Scenario: Recording active
+- **WHEN** a dynamic macro recording is in progress (slot 1 or slot 2)
+- **THEN** the 16×16 record glyph is rendered at x=16, y=60
+
+#### Scenario: Recording inactive
+- **WHEN** no dynamic macro recording is in progress
+- **THEN** the region x 16–31, y 60–75 is left to the base image
+
+---
+
 ### Requirement: Modifier indicators are side-aware
 Each OLED SHALL display modifier indicators only for the modifier keys physically located on the same half of the keyboard. The physical side SHALL be determined via `is_keyboard_left()`. Left-side OLEDs SHALL check `MOD_BIT(KC_LSFT)`, `MOD_BIT(KC_LCTL)`, `MOD_BIT(KC_LGUI)`, and `MOD_BIT(KC_LALT)`. Right-side OLEDs SHALL check the corresponding `KC_R*` bits. `MOD_MASK_*` macros (which match both sides) SHALL NOT be used for modifier indicator logic.
 

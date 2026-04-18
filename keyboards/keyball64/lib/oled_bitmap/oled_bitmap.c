@@ -12,6 +12,18 @@
 // Bouncing ball state
 // ---------------------------------------------------------------------------
 
+static uint8_t dynmacro_recording = 0;
+
+bool dynamic_macro_record_start_user(int8_t direction) {
+    dynmacro_recording = (direction == 1) ? 1 : 2;
+    return true;
+}
+
+bool dynamic_macro_record_end_user(int8_t direction) {
+    dynmacro_recording = 0;
+    return true;
+}
+
 // Ball position (top-left corner). Valid range: x ∈ [0,23], y ∈ [0,87].
 static uint8_t ball_x  = 0;
 static uint8_t ball_y  = 0;
@@ -122,6 +134,12 @@ static void oledkit_render_info_user(void) {
 
     // WPM — bounding box x 0–31, y 43–57
     draw_number(get_current_wpm(), 0, 43);
+
+    // Swap hands — x 0–15, y 60–75
+    if (is_swap_hands_on()) draw_bitmap(0, 60, bmp_swaphands, 16, 16);
+
+    // Dynamic macro recording — x 16–31, y 60–75
+    if (dynmacro_recording) draw_bitmap(16, 60, bmp_record, 16, 16);
 
     // Caps Lock — x 0–15, y 78–93
     if (leds.caps_lock) draw_bitmap(0, 78, bmp_capslock, 16, 16);
